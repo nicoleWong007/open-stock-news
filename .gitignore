@@ -1,0 +1,20 @@
+node_modules/
+dist/
+.env
+*.tgz
+
+# User config
+.oak-invest/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test
+coverage/
