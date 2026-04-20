@@ -104,11 +104,9 @@ oak-invest/
 │   ├── data/
 │   │   ├── sources/
 │   │   │   ├── yahoo-finance.ts    # 美股数据源 (yahoo-finance2)
-│   │   │   ├── akshare-bridge.ts   # Python akshare 桥接
+│   │   │   ├── akshare-bridge.ts   # Python akshare 桥接（stdin/stdout）
 │   │   │   ├── fred.ts             # FRED 宏观数据
 │   │   │   └── news.ts             # 新闻/情绪数据
-│   │   ├── python/
-│   │   │   └── bridge.py           # akshare 子进程脚本
 │   │   └── types.ts                # 统一数据类型
 │   │
 │   ├── knowledge/
@@ -177,8 +175,9 @@ interface AkshareResponse {
 }
 
 async function callAkshare(req: AkshareRequest): Promise<AkshareResponse> {
-  // 方案: 启动 Python HTTP 微服务 (Flask/FastAPI)
-  // 或: stdin/stdout JSON 桥接
+  // 使用 stdin/stdout JSON 桥接模式
+  // 启动 python3 python/akshare_bridge.py，通过 stdin 写入 JSON 请求，从 stdout 读取 JSON 响应
+  // 无需 HTTP 服务，进程即用即退
 }
 ```
 
@@ -537,7 +536,6 @@ data_sources:
 | 包名 | 用途 |
 |------|------|
 | `akshare` | A 股/港股/宏观数据 |
-| `flask` 或 `fastapi` | HTTP 桥接服务（可选，也可用 stdin/stdout） |
 
 ## 10. 非目标（明确排除）
 
