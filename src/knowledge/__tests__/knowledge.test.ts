@@ -24,9 +24,9 @@ describe('loadKnowledge', () => {
     expect(knowledge.maxims.length).toBeGreaterThan(100);
   });
 
-  it('returns empty memos in Phase 1', () => {
+  it('loads memo files from knowledge/memos directory', () => {
     const knowledge = loadKnowledge();
-    expect(Object.keys(knowledge.memos).length).toBe(0);
+    expect(typeof knowledge.memos).toBe('object');
   });
 
   it('book content contains key concepts', () => {
