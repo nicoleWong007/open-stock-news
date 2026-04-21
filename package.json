@@ -39,6 +39,7 @@
     "@mariozechner/pi-tui": "^0.67.68",
     "@sinclair/typebox": "^0.34.49",
     "chalk": "^5.4.0",
+    "dotenv": "^16.4.7",
     "cheerio": "^1.0.0",
     "cli-table3": "^0.6.5",
     "commander": "^13.1.0",
