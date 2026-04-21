@@ -7,14 +7,14 @@ export const DEFAULT_CONFIG: OakInvestConfig = {
     fred_api_key_env: 'FRED_API_KEY',
   },
   llm: {
-    default_provider: 'openai',
-    default_model: 'gpt-4o',
+    default_provider: 'gemini',
+    default_model: 'gemini-2.5-pro',
     providers: {
+      gemini: {
+        api_key_env: 'GOOGLE_API_KEY',
+      },
       openai: {
         api_key_env: 'OPENAI_API_KEY',
-      },
-      anthropic: {
-        api_key_env: 'ANTHROPIC_API_KEY',
       },
       ollama: {
         base_url: 'http://localhost:11434',
@@ -42,13 +42,13 @@ export const DEFAULT_CONFIG_YAML = `# oak-invest configuration
 # See docs for all options: https://github.com/nicoleWong007/open-stock-news
 
 llm:
-  default_provider: openai
-  default_model: gpt-4o
+  default_provider: gemini
+  default_model: gemini-2.5-pro
   providers:
+    gemini:
+      api_key_env: GOOGLE_API_KEY
     openai:
       api_key_env: OPENAI_API_KEY
-    anthropic:
-      api_key_env: ANTHROPIC_API_KEY
     ollama:
       base_url: http://localhost:11434
 

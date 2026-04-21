@@ -9,8 +9,8 @@ export const ProviderConfigSchema = z.object({
 export type ProviderConfig = z.infer<typeof ProviderConfigSchema>;
 
 export const LlmConfigSchema = z.object({
-  default_provider: z.string().default('openai'),
-  default_model: z.string().default('gpt-4o'),
+  default_provider: z.string().default('gemini'),
+  default_model: z.string().default('gemini-2.5-pro'),
   providers: z.record(z.string(), ProviderConfigSchema).default({}),
 });
 

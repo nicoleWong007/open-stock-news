@@ -5,10 +5,10 @@ describe('OakInvestConfigSchema', () => {
   it('accepts valid full config', () => {
     const result = OakInvestConfigSchema.safeParse({
       llm: {
-        default_provider: 'openai',
-        default_model: 'gpt-4o',
+        default_provider: 'gemini',
+        default_model: 'gemini-2.5-pro',
         providers: {
-          openai: { api_key_env: 'OPENAI_API_KEY' },
+          gemini: { api_key_env: 'GOOGLE_API_KEY' },
         },
       },
       watchlists: {
@@ -32,8 +32,8 @@ describe('OakInvestConfigSchema', () => {
     const result = OakInvestConfigSchema.safeParse({});
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.llm.default_provider).toBe('openai');
-      expect(result.data.llm.default_model).toBe('gpt-4o');
+      expect(result.data.llm.default_provider).toBe('gemini');
+      expect(result.data.llm.default_model).toBe('gemini-2.5-pro');
       expect(result.data.email.enabled).toBe(false);
       expect(result.data.data_sources.python_bridge).toBe(false);
     }
