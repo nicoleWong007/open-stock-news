@@ -1,6 +1,11 @@
 import type { OakInvestConfig } from './schema.js';
 
 export const DEFAULT_CONFIG: OakInvestConfig = {
+  macro: {
+    enabled: true,
+    cache_ttl_hours: 24,
+    fred_api_key_env: 'FRED_API_KEY',
+  },
   llm: {
     default_provider: 'openai',
     default_model: 'gpt-4o',

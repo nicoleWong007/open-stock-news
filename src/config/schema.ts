@@ -36,6 +36,15 @@ export const DataSourceConfigSchema = z.object({
 
 export type DataSourceConfig = z.infer<typeof DataSourceConfigSchema>;
 
+// Macro fetcher configuration
+export const MacroConfigSchema = z.object({
+  enabled: z.boolean().default(true),
+  cache_ttl_hours: z.number().default(24),
+  fred_api_key_env: z.string().default('FRED_API_KEY'),
+});
+
+export type MacroConfig = z.infer<typeof MacroConfigSchema>;
+
 export const OakInvestConfigSchema = z.object({
   llm: LlmConfigSchema.default({}),
   watchlists: z.record(z.string(), z.array(z.string())).default({
@@ -43,6 +52,7 @@ export const OakInvestConfigSchema = z.object({
   }),
   email: EmailConfigSchema.default({}),
   data_sources: DataSourceConfigSchema.default({}),
+  macro: MacroConfigSchema.default({}),
 });
 
 export type OakInvestConfig = z.infer<typeof OakInvestConfigSchema>;
