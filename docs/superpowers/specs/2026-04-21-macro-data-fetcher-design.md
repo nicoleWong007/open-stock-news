@@ -84,14 +84,21 @@ src/
 ~/.oak-invest/cache/macro-context.json
 ```
 
-### TTL Rules
+### US Market Trading Hours (Beijing Time)
 
-| Time Period | TTL | Reason |
-|-------------|-----|--------|
-| Weekend | 24 hours | Market closed |
-| Pre-market (0-9am) | 24 hours | Using previous close |
-| Trading hours (9am-4pm) | 30 minutes | Market moving |
-| After hours (4pm+) | 24 hours | Close data finalized |
+| Season | Open | Close |
+|--------|------|-------|
+| Summer DST (Mar-Nov) | 21:30 | 04:00 (next day) |
+| Winter Standard (Nov-Mar) | 22:30 | 05:00 (next day) |
+
+### TTL Rules (Beijing Time)
+
+| Time Period | Summer (DST) | Winter (Standard) | TTL |
+|-------------|--------------|-------------------|-----|
+| Pre-market | < 21:30 | < 22:30 | 24h |
+| Trading hours | 21:30-04:00 | 22:30-05:00 | 30min |
+| After hours | 04:00-21:30 | 05:00-22:30 | 24h |
+| Weekend | All day | All day | 24h |
 
 ### Cache Validity Logic
 
@@ -105,6 +112,43 @@ function isCacheValid(cache: MacroCache): boolean {
   const ageMs = Date.now() - cache.fetchedAt;
   const ttlMs = getTTLForCurrentTime();
   return ageMs < ttlMs;
+}
+
+function getTTLForCurrentTime(): number {
+  const now = new Date();
+  const isDST = isUsDaylightSavingTime(now);
+  const hour = now.getHours();
+  const dayOfWeek = now.getDay();
+  
+  // Weekend: long TTL
+  if (dayOfWeek === 0 || dayOfWeek === 6) {
+    return 24 * 60 * 60 * 1000;
+  }
+  
+  // Market hours based on DST
+  const marketOpenHour = isDST ? 21 : 22;
+  const marketCloseHour = isDST ? 4 : 5;
+  
+  // After close to before open (using previous close)
+  if (hour >= marketCloseHour && hour < marketOpenHour) {
+    return 24 * 60 * 60 * 1000;
+  }
+  
+  // Trading hours (shorter TTL)
+  if (hour >= marketOpenHour || hour < marketCloseHour) {
+    return 30 * 60 * 1000;
+  }
+  
+  return 24 * 60 * 60 * 1000;
+}
+
+function isUsDaylightSavingTime(date: Date): boolean {
+  // US DST: 2nd Sunday of March - 1st Sunday of November
+  const year = date.getFullYear();
+  const marchSecondSunday = getNthSundayOfMonth(year, 2, 2);
+  const novemberFirstSunday = getNthSundayOfMonth(year, 10, 1);
+  const timestamp = date.getTime();
+  return timestamp >= marchSecondSunday && timestamp < novemberFirstSunday;
 }
 ```
 
