@@ -5,6 +5,8 @@ import { loadConfig } from '../config/loader.js';
 import { createInvestmentAgent } from '../agent/agent.js';
 import { buildAnalysisPrompt } from '../agent/system-prompt.js';
 import { formatReportHeader, formatReportFooter } from '../output/report-formatter.js';
+import { ExperienceStore } from '../evolution/memory/experience-store.js';
+import { detectMarket, generateId, type StockCategory } from '../evolution/index.js';
 
 export function registerAnalyzeCommand(program: Command): void {
   program
@@ -65,9 +67,55 @@ export function registerAnalyzeCommand(program: Command): void {
         await agent.prompt(prompt);
 
         console.log(formatReportFooter());
+
+        await saveExperienceRecords(targets);
+
       } catch (err) {
         console.error(chalk.red(`\nAnalysis failed: ${err instanceof Error ? err.message : String(err)}`));
         process.exit(1);
       }
     });
+}
+
+async function saveExperienceRecords(symbols: string[]): Promise<void> {
+  const store = new ExperienceStore();
+  const timestamp = new Date().toISOString();
+
+  for (const symbol of symbols) {
+    try {
+      const market = detectMarket(symbol);
+      const category: StockCategory = {
+        type: 'large_cap',
+        sector: 'unknown',
+      };
+
+      await store.save({
+        id: generateId(),
+        timestamp,
+        market,
+        symbol,
+        stockCategory: category,
+        context: {
+          cycleScore: 5,
+          cycleDimensions: {
+            economic: 5,
+            profit: 5,
+            psychology: 5,
+            riskAttitude: 5,
+            credit: 5,
+          },
+          marketConditions: 'Analysis recorded for future tracking',
+        },
+        decision: {
+          recommendation: 'hold',
+          reasoning: 'Analysis completed. See agent output for details.',
+          confidence: 0.5,
+          keyFactors: [],
+          matrixBaseline: 'hold',
+        },
+      });
+    } catch (err) {
+      console.error(chalk.yellow(`Warning: Failed to save experience for ${symbol}: ${err instanceof Error ? err.message : String(err)}`));
+    }
+  }
 }

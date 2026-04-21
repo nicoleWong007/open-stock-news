@@ -1,4 +1,10 @@
-import { loadKnowledge } from './loader.js';
+import { loadKnowledge, loadPrinciples, type MarketScope } from './loader.js';
+
+const MARKET_NAMES: Record<Exclude<MarketScope, 'shared'>, string> = {
+  us: 'US Market',
+  a_share: 'A-Share Market',
+  hk: 'HK Market',
+};
 
 const IDENTITY_PROMPT = `You are Oak Invest Agent, an investment analysis assistant guided by Howard Marks' philosophy from "The Most Important Thing" and "Mastering the Market Cycle."
 
@@ -23,7 +29,7 @@ function buildLayer(title: string, content: string): string {
   return `\n## ${title}\n\n${content}`;
 }
 
-export function buildSystemPrompt(marketContext?: string): string {
+export function buildSystemPrompt(marketContext?: string, market?: Exclude<MarketScope, 'shared'>): string {
   const knowledge = loadKnowledge();
 
   const parts: string[] = [IDENTITY_PROMPT];
@@ -34,13 +40,24 @@ export function buildSystemPrompt(marketContext?: string): string {
     parts.push(buildLayer('Core Investment Principles', bookContents.join('\n\n---\n\n')));
   }
 
-  // Decision rules from principles
-  const principleContents = Object.values(knowledge.principles);
-  if (principleContents.length > 0) {
-    parts.push(buildLayer('Decision Rules and Frameworks', principleContents.join('\n\n---\n\n')));
+  // Shared decision rules
+  const sharedPrinciples = knowledge.principles.shared;
+  if (Object.keys(sharedPrinciples).length > 0) {
+    parts.push(buildLayer('Decision Rules (Universal)', Object.values(sharedPrinciples).join('\n\n---\n\n')));
   }
 
-  // Memo context (dynamic, may be empty in Phase 1)
+  // Market-specific principles
+  if (market) {
+    const marketPrinciples = knowledge.principles[market];
+    if (Object.keys(marketPrinciples).length > 0) {
+      parts.push(buildLayer(
+        `${MARKET_NAMES[market]} Specific Adjustments`,
+        Object.values(marketPrinciples).join('\n\n---\n\n')
+      ));
+    }
+  }
+
+  // Memo context (dynamic, may be empty)
   const memoContents = Object.values(knowledge.memos);
   if (memoContents.length > 0) {
     parts.push(buildLayer('Recent Oaktree Memos', memoContents.join('\n\n---\n\n')));

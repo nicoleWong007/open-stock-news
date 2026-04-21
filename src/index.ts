@@ -7,6 +7,10 @@ import { registerChatCommand } from './commands/chat.js';
 import { registerCycleCheckCommand } from './commands/cycle-check.js';
 import { registerDailyReportCommand } from './commands/daily-report.js';
 import { registerUpdateMemosCommand } from './commands/update-memos.js';
+import { registerTrackCommand, registerAccuracyReportCommand, registerExperienceCommand } from './commands/track.js';
+import { registerReflectCommand } from './commands/reflect.js';
+import { registerReviewCommand } from './commands/review.js';
+import { registerEvolutionCommand } from './commands/evolution.js';
 
 program
   .name('oak-invest')
@@ -20,5 +24,11 @@ registerChatCommand(program);
 registerCycleCheckCommand(program);
 registerDailyReportCommand(program);
 registerUpdateMemosCommand(program);
+registerTrackCommand(program);
+registerAccuracyReportCommand(program);
+registerExperienceCommand(program);
+registerReflectCommand(program);
+registerReviewCommand(program);
+registerEvolutionCommand(program);
 
 program.parse();

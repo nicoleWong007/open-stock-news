@@ -45,7 +45,7 @@
     "js-yaml": "^4.1.0",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.10.0",
-    "yahoo-finance2": "^2.13.0",
+    "yahoo-finance2": "^3.14.0",
     "zod": "^3.24.0"
   },
   "devDependencies": {

@@ -11,11 +11,11 @@ describe('loadKnowledge', () => {
 
   it('loads all principle files', () => {
     const knowledge = loadKnowledge();
-    expect(knowledge.principles['risk-framework']).toBeDefined();
-    expect(knowledge.principles['cycle-positioning']).toBeDefined();
-    expect(knowledge.principles['valuation-rules']).toBeDefined();
-    expect(knowledge.principles['contrarian-checklist']).toBeDefined();
-    expect(knowledge.principles['decision-matrix']).toBeDefined();
+    expect(knowledge.principles.shared['risk-framework']).toBeDefined();
+    expect(knowledge.principles.shared['cycle-positioning']).toBeDefined();
+    expect(knowledge.principles.shared['valuation-rules']).toBeDefined();
+    expect(knowledge.principles.shared['contrarian-checklist']).toBeDefined();
+    expect(knowledge.principles.shared['decision-matrix']).toBeDefined();
   });
 
   it('loads maxims', () => {

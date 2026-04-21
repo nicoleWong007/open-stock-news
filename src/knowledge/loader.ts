@@ -4,9 +4,16 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+export type MarketScope = 'shared' | 'us' | 'a_share' | 'hk';
+
 interface KnowledgeContent {
   books: Record<string, string>;
-  principles: Record<string, string>;
+  principles: {
+    shared: Record<string, string>;
+    us: Record<string, string>;
+    a_share: Record<string, string>;
+    hk: Record<string, string>;
+  };
   maxims: string;
   memos: Record<string, string>;
 }
@@ -36,7 +43,13 @@ export function loadKnowledge(): KnowledgeContent {
   const memosDir = path.join(knowledgeDir, 'memos');
 
   const books = readDirFiles(booksDir);
-  const principles = readDirFiles(principlesDir);
+  
+  const principles = {
+    shared: readDirFiles(path.join(principlesDir, 'shared')),
+    us: readDirFiles(path.join(principlesDir, 'us')),
+    a_share: readDirFiles(path.join(principlesDir, 'a_share')),
+    hk: readDirFiles(path.join(principlesDir, 'hk')),
+  };
 
   let maxims = '';
   const maximsPath = path.join(knowledgeDir, 'maxims.md');
@@ -47,4 +60,10 @@ export function loadKnowledge(): KnowledgeContent {
   const memos = readDirFiles(memosDir);
 
   return { books, principles, maxims, memos };
+}
+
+export function loadPrinciples(scope: MarketScope): Record<string, string> {
+  const projectRoot = path.resolve(__dirname, '..', '..');
+  const principlesDir = path.join(projectRoot, 'knowledge', 'principles', scope);
+  return readDirFiles(principlesDir);
 }
