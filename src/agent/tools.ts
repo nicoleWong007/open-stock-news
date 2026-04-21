@@ -2,8 +2,13 @@ import { Type } from '@sinclair/typebox';
 import type { TSchema } from '@sinclair/typebox';
 import type { AgentTool } from '@mariozechner/pi-agent-core';
 import { createYahooFinanceSource } from '../data/index.js';
+import { createMacroFetcher } from '../engines/macro-fetcher/index.js';
+import type { MarketContext } from '../engines/macro-fetcher/index.js';
 
 const yahooSource = createYahooFinanceSource();
+const macroFetcher = createMacroFetcher({ cacheTtlMs: 24 * 60 * 60 * 1000, enabled: true });
+
+const NoParamsSchema = Type.Object({});
 
 const SymbolSchema = Type.Object({
   symbol: Type.String({ description: 'Stock symbol (e.g. AAPL, MSFT)' }),
@@ -122,6 +127,68 @@ export const getHistoricalPrices: AgentTool<typeof SymbolRangeSchema> = {
   },
 };
 
+export const getMarketContext: AgentTool<typeof NoParamsSchema> = {
+  name: 'get_market_context',
+  label: 'Get Market Context',
+  description: `Get current macro market context including:
+- Major indices (S&P 500, NASDAQ, DOW)
+- Sector performance
+- Market sentiment (VIX, Put/Call ratio)
+- Economic indicators (rates, unemployment, GDP)
+- Commodities (DXY, Oil, Gold)
+
+Data is cached for 24 hours and refreshed automatically.`,
+  parameters: NoParamsSchema,
+  async execute(_id, _params) {
+    try {
+      const context = await macroFetcher.getMarketContext();
+      return textResult(formatMarketContext(context));
+    } catch (err) {
+      return errorResult(err);
+    }
+  },
+};
+
+function formatMarketContext(ctx: MarketContext): string {
+  const idx = ctx.indices;
+  const sent = ctx.sentiment;
+  const econ = ctx.economic;
+  const comm = ctx.commodities;
+
+  const sectorRows = ctx.sectors
+    .map((s) => `${s.name}: ${s.changePercent >= 0 ? '+' : ''}${s.changePercent.toFixed(2)}%`)
+    .join(' | ');
+
+  return `## Market Overview (${ctx.metadata.marketDate})
+
+### Indices
+| Index | Price | Change |
+|-------|-------|--------|
+| S&P 500 | ${idx.sp500.price.toFixed(2)} | ${idx.sp500.changePercent >= 0 ? '+' : ''}${idx.sp500.changePercent.toFixed(2)}% |
+| NASDAQ | ${idx.nasdaq.price.toFixed(2)} | ${idx.nasdaq.changePercent >= 0 ? '+' : ''}${idx.nasdaq.changePercent.toFixed(2)}% |
+| DOW | ${idx.dow.price.toFixed(2)} | ${idx.dow.changePercent >= 0 ? '+' : ''}${idx.dow.changePercent.toFixed(2)}% |
+
+### Sector Performance
+${sectorRows || 'No data available'}
+
+### Sentiment
+- VIX: ${sent.vix.toFixed(2)}
+- Put/Call Ratio: ${sent.putCallRatio.toFixed(2)}
+
+### Economic Indicators
+- 10Y Yield: ${econ.tenYearYield.toFixed(2)}%
+- Fed Funds Rate: ${econ.federalFundsRate.toFixed(2)}%
+- Unemployment: ${econ.unemploymentRate.toFixed(1)}%
+- GDP Growth: ${econ.gdpGrowth.toFixed(1)}%
+
+### Commodities
+- DXY: ${comm.dxy.toFixed(2)}
+- WTI: $${comm.wti.toFixed(2)}
+- Gold: $${comm.gold.toFixed(2)}
+
+_Cached: ${new Date(ctx.metadata.fetchedAt).toLocaleString()}_`;
+}
+
 export function getAllTools(): AgentTool<TSchema>[] {
-  return [getStockPrice, getFinancials, getValuation, getHistoricalPrices] as unknown as AgentTool<TSchema>[];
+  return [getStockPrice, getFinancials, getValuation, getHistoricalPrices, getMarketContext] as unknown as AgentTool<TSchema>[];
 }
