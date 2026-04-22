@@ -35,7 +35,10 @@ export function registerAnalyzeCommand(program: Command): void {
 
       try {
         const config = loadConfig();
-        const agent = createInvestmentAgent(config);
+        const detectedMarket = targets.length > 0 ? detectMarket(targets[0]) : undefined;
+        const agent = createInvestmentAgent(config, {
+          promptOptions: { market: detectedMarket }
+        });
 
         agent.subscribe((event: AgentEvent) => {
           switch (event.type) {

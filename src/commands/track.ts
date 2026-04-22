@@ -147,9 +147,11 @@ export function registerAccuracyReportCommand(program: Command): void {
 }
 
 export function registerExperienceCommand(program: Command): void {
-  program
+  const experienceCmd = program
     .command('experience')
-    .description('Manage experience records')
+    .description('Manage experience records');
+
+  experienceCmd
     .command('list')
     .description('List experience records')
     .option('-m, --market <market>', 'Filter by market')
@@ -186,8 +188,8 @@ export function registerExperienceCommand(program: Command): void {
       console.log(chalk.dim(`Showing ${limited.length} of ${records.length} records\n`));
     });
 
-  program
-    .command('experience show <id>')
+  experienceCmd
+    .command('show <id>')
     .description('Show details of an experience record')
     .action(async (id: string) => {
       const store = new ExperienceStore();

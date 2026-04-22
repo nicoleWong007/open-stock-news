@@ -4,6 +4,7 @@ import type { Model, Api } from '@mariozechner/pi-ai';
 import type { OakInvestConfig } from '../config/schema.js';
 import { buildSystemPrompt } from './system-prompt.js';
 import { getAllTools } from './tools.js';
+import type { PromptOptions } from '../knowledge/types.js';
 
 function resolveModel(config: OakInvestConfig): Model<Api> {
   const provider = config.llm.default_provider;
@@ -16,9 +17,14 @@ function resolveModel(config: OakInvestConfig): Model<Api> {
   }
 }
 
-export function createInvestmentAgent(config: OakInvestConfig): Agent {
+export interface CreateAgentOptions {
+  promptOptions?: PromptOptions;
+  marketContext?: string;
+}
+
+export function createInvestmentAgent(config: OakInvestConfig, options?: CreateAgentOptions): Agent {
   const model = resolveModel(config);
-  const systemPrompt = buildSystemPrompt();
+  const systemPrompt = buildSystemPrompt(options?.marketContext, options?.promptOptions);
   const tools = getAllTools();
 
   const agent = new Agent({

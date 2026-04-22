@@ -8,8 +8,12 @@ import { MARKET_DISPLAY_NAMES } from '../evolution/helpers.js';
 import type { Market } from '../evolution/types.js';
 
 export function registerEvolutionCommand(program: Command): void {
-  program
-    .command('evolution status')
+  const evolutionCmd = program
+    .command('evolution')
+    .description('Evolution system management');
+
+  evolutionCmd
+    .command('status')
     .description('Show evolution system status')
     .action(async () => {
       console.log(chalk.bold('\n🔄 Evolution Status\n'));
@@ -40,8 +44,8 @@ export function registerEvolutionCommand(program: Command): void {
       }
     });
 
-  program
-    .command('evolution stats')
+  evolutionCmd
+    .command('stats')
     .description('Show detailed evolution statistics')
     .option('-m, --market <market>', 'Filter by market')
     .action(async (options: { market?: Market }) => {
@@ -97,8 +101,8 @@ export function registerEvolutionCommand(program: Command): void {
       }
     });
 
-  program
-    .command('evolution start')
+  evolutionCmd
+    .command('start')
     .description('Start the evolution scheduler')
     .action(async () => {
       console.log(chalk.bold('\n▶️ Starting Evolution Scheduler\n'));
@@ -113,8 +117,8 @@ export function registerEvolutionCommand(program: Command): void {
       }
     });
 
-  program
-    .command('evolution stop')
+  evolutionCmd
+    .command('stop')
     .description('Stop the evolution scheduler')
     .action(() => {
       console.log(chalk.bold('\n⏹️ Stopping Evolution Scheduler\n'));

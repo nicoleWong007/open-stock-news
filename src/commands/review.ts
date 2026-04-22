@@ -5,8 +5,12 @@ import { formatPrincipleForTerminal } from '../evolution/curator/principle-forma
 import type { Market } from '../evolution/types.js';
 
 export function registerReviewCommand(program: Command): void {
-  program
-    .command('review list')
+  const reviewCmd = program
+    .command('review')
+    .description('Manage principle reviews');
+
+  reviewCmd
+    .command('list')
     .description('List pending principles for review')
     .option('-m, --market <market>', 'Filter by market')
     .action(async (options: { market?: Market }) => {
@@ -36,8 +40,8 @@ export function registerReviewCommand(program: Command): void {
       }
     });
 
-  program
-    .command('review show <id>')
+  reviewCmd
+    .command('show <id>')
     .description('Show details of a proposed principle')
     .action(async (id: string) => {
       try {
@@ -59,8 +63,8 @@ export function registerReviewCommand(program: Command): void {
       }
     });
 
-  program
-    .command('review approve <id>')
+  reviewCmd
+    .command('approve <id>')
     .description('Approve a proposed principle')
     .option('-n, --notes <notes>', 'Review notes')
     .action(async (id: string, options: { notes?: string }) => {
@@ -79,8 +83,8 @@ export function registerReviewCommand(program: Command): void {
       }
     });
 
-  program
-    .command('review reject <id>')
+  reviewCmd
+    .command('reject <id>')
     .description('Reject a proposed principle')
     .requiredOption('-r, --reason <reason>', 'Reason for rejection')
     .action(async (id: string, options: { reason: string }) => {

@@ -1,6 +1,15 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { loadKnowledge } from '@/knowledge/loader.js';
 import { buildSystemPrompt } from '@/knowledge/prompt-builder.js';
+import { clearCache } from '@/knowledge/cache.js';
+
+beforeEach(() => {
+  clearCache();
+});
+
+afterEach(() => {
+  clearCache();
+});
 
 describe('loadKnowledge', () => {
   it('loads all book files', () => {
@@ -76,5 +85,37 @@ describe('buildSystemPrompt', () => {
   it('excludes market context when not provided', () => {
     const prompt = buildSystemPrompt();
     expect(prompt).not.toContain('Current Market Context');
+  });
+
+  it('excludes memos by default', () => {
+    const prompt = buildSystemPrompt();
+    expect(prompt).not.toContain('Recent Oaktree Memos');
+  });
+
+  it('includes memos when mode is latest', () => {
+    const prompt = buildSystemPrompt(undefined, { memos: { mode: 'latest', count: 1 } });
+    expect(prompt).toContain('Recent Oaktree Memos');
+  });
+
+  it('includes memos when mode is full', () => {
+    const prompt = buildSystemPrompt(undefined, { memos: { mode: 'full' } });
+    expect(prompt).toContain('Recent Oaktree Memos');
+  });
+
+  it('excludes foundation when includeFoundation is false', () => {
+    const prompt = buildSystemPrompt(undefined, { includeFoundation: false });
+    expect(prompt).not.toContain('Core Investment Principles');
+  });
+
+  it('supports legacy API with market string', () => {
+    const prompt = buildSystemPrompt(undefined, 'us');
+    expect(prompt).toContain('Oak Invest Agent');
+  });
+
+  it('is significantly smaller without memos', () => {
+    const promptWithoutMemos = buildSystemPrompt();
+    const promptWithMemos = buildSystemPrompt(undefined, { memos: { mode: 'full' } });
+    expect(promptWithoutMemos.length).toBeLessThan(promptWithMemos.length);
+    expect(promptWithoutMemos.length).toBeLessThan(35000);
   });
 });
