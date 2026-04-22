@@ -1,7 +1,8 @@
 import { Type } from '@sinclair/typebox';
 import type { TSchema } from '@sinclair/typebox';
 import type { AgentTool } from '@mariozechner/pi-agent-core';
-import { createYahooFinanceSource } from '../data/index.js';
+import { createYahooFinanceSource, getSymbolCache } from '../data/index.js';
+import type { StockQuote, FinancialReport, ValuationMetrics } from '../data/index.js';
 import { createMacroFetcher } from '../engines/macro-fetcher/index.js';
 import type { MarketContext } from '../engines/macro-fetcher/index.js';
 
@@ -38,7 +39,9 @@ export const getStockPrice: AgentTool<typeof SymbolSchema> = {
   parameters: SymbolSchema,
   async execute(_id, params) {
     try {
-      const quote = await yahooSource.getQuote(params.symbol);
+      const cache = getSymbolCache();
+      const cached = cache.get(params.symbol, 'quote') as StockQuote | null;
+      const quote = cached ?? await yahooSource.getQuote(params.symbol);
       return textResult(
         `Symbol: ${quote.symbol} (${quote.name})\n` +
         `Price: ${quote.price} ${quote.currency}\n` +
@@ -60,7 +63,9 @@ export const getFinancials: AgentTool<typeof SymbolSchema> = {
   parameters: SymbolSchema,
   async execute(_id, params) {
     try {
-      const fin = await yahooSource.getFinancials(params.symbol);
+      const cache = getSymbolCache();
+      const cached = cache.get(params.symbol, 'financials') as FinancialReport | null;
+      const fin = cached ?? await yahooSource.getFinancials(params.symbol);
       return textResult(
         `Symbol: ${fin.symbol}\n` +
         `Period: ${fin.period}\n` +
@@ -87,7 +92,9 @@ export const getValuation: AgentTool<typeof SymbolSchema> = {
   parameters: SymbolSchema,
   async execute(_id, params) {
     try {
-      const val = await yahooSource.getValuationMetrics(params.symbol);
+      const cache = getSymbolCache();
+      const cached = cache.get(params.symbol, 'valuation') as ValuationMetrics | null;
+      const val = cached ?? await yahooSource.getValuationMetrics(params.symbol);
       const fmt = (v: number | null) => v !== null ? v.toFixed(2) : 'N/A';
       return textResult(
         `Symbol: ${val.symbol}\n` +
