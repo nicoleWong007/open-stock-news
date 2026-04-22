@@ -7,60 +7,7 @@ import type {
   FinancialReport,
   ValuationMetrics,
 } from '../types.js';
-
-const MAX_RETRIES = 3;
-const BASE_DELAY_MS = 1000;
-const TIMEOUT_MS = 30000;
-
-class DataFetchError extends Error {
-  constructor(
-    public readonly symbol: string,
-    message: string,
-    public readonly cause?: unknown,
-  ) {
-    super(`[${symbol}] ${message}`);
-    this.name = 'DataFetchError';
-  }
-}
-
-async function withRetry<T>(fn: () => Promise<T>, symbol: string): Promise<T> {
-  let lastError: unknown;
-  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    try {
-      return await fn();
-    } catch (err) {
-      lastError = err;
-      const isRateLimit =
-        err instanceof Error &&
-        (err.message.includes('429') || err.message.toLowerCase().includes('rate'));
-      if (!isRateLimit || attempt === MAX_RETRIES - 1) {
-        break;
-      }
-      const delay = BASE_DELAY_MS * Math.pow(2, attempt);
-      await new Promise((resolve) => setTimeout(resolve, delay));
-    }
-  }
-  throw new DataFetchError(symbol, 'Failed after retries', lastError);
-}
-
-function withTimeout<T>(promise: Promise<T>, symbol: string): Promise<T> {
-  return new Promise<T>((resolve, reject) => {
-    const timer = setTimeout(
-      () => reject(new DataFetchError(symbol, `Request timed out after ${TIMEOUT_MS}ms`)),
-      TIMEOUT_MS,
-    );
-    promise.then(
-      (val) => {
-        clearTimeout(timer);
-        resolve(val);
-      },
-      (err) => {
-        clearTimeout(timer);
-        reject(err);
-      },
-    );
-  });
-}
+import { withRetry, withTimeout } from './utils.js';
 
 export class YahooFinanceSource implements MarketDataSource {
   async getQuote(symbol: string): Promise<StockQuote> {
