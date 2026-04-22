@@ -11,9 +11,13 @@ function resolveModel(config: OakInvestConfig): Model<Api> {
   const modelId = config.llm.default_model;
 
   try {
-    return getModel(provider as 'openai', modelId as 'gpt-4o') as Model<Api>;
+    return getModel(provider as never, modelId as never) as Model<Api>;
   } catch {
-    return getModel('openai', 'gpt-4o') as Model<Api>;
+    try {
+      return getModel('google', 'gemini-2.5-flash') as Model<Api>;
+    } catch {
+      return getModel('openai', 'gpt-4o-mini') as Model<Api>;
+    }
   }
 }
 
